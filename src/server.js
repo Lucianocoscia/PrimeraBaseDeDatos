@@ -4,9 +4,14 @@ import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { engine } from "express-handlebars";
 import router from "./routes/index.js";
+
 //importo socket
 import { Server as IOServer } from "socket.io";
 import Contenedor from "./api.js";
+
+//  COmienza config para loguear con mongo
+import MongoStore from "connect-mongo";
+import session from "express-session";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -14,6 +19,7 @@ const app = express();
 //app use
 app.use(json());
 app.use("/", router);
+
 app.use(urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/views/layouts"));
 
@@ -98,3 +104,24 @@ io.on("connection", async (socket) => {
 app.on("error", (err) => {
   console.log(err);
 });
+
+// termino config de mongo logging
+//  Comienza config para loguear con mongo
+const mongoOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+
+app.use(
+  session({
+    secret: "coderhouse",
+    rolling: true, // Esto lo que hace es que reinicia el tiempo de expiracion de las sesiones con cada request
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoStore({
+      mongoUrl:
+        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/?retryWrites=true&w=majority",
+      mongoOptions,
+    }),
+  })
+);
