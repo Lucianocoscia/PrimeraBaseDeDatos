@@ -18,18 +18,17 @@ router.route("/api/productos-test").get(async (req, res) => {
 // login
 router
   .route("/login")
-  .get(async (req, res) => {
+  .get((req, res) => {
     res.render("login");
   })
-  .post(async (req, res) => {
-    let { user } = req.body;
+  .post((req, res) => {
+    console.log("hola");
+    let user = req.body.username;
+
     if (user) {
       req.session.user = user;
       res.render("bienvenida", { user });
     }
-    // else {
-    //   res.render("logueo");
-    // }
   });
 
 router.route("/logout").get(async (req, res) => {
@@ -37,7 +36,5 @@ router.route("/logout").get(async (req, res) => {
   req.session.destroy();
   res.render("logout", { user });
 });
-// router.use("/api", loginRouter);
-// router.use("/api", logoutRouter);
 
 export default router;

@@ -1,29 +1,58 @@
-import express, { json, urlencoded } from "express";
+import express, { json, urlencoded } from "express"; //importo express
 //dirname
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
+// importo hbs
 import { engine } from "express-handlebars";
+//importo rutas
 import router from "./routes/index.js";
 
 //importo socket
 import { Server as IOServer } from "socket.io";
+//importo contendor con clase q maneja todo el crud
 import Contenedor from "./api.js";
 
-//  COmienza config para loguear con mongo
+//  COmienza config para loguear con mongo y session
 import MongoStore from "connect-mongo";
 import session from "express-session";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const app = express();
 
-//app use
-app.use(json());
-app.use("/", router);
+const app = express(); //Inicializo la app
 
+// middleware
 app.use(urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/views/layouts"));
+app.use(json());
 
-// lo definimos SEteamos HBS
+// termino config de mongo logging
+//  Comienza config para loguear con mongo
+const mongoOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+
+app.use(
+  session({
+    secret: "coderhouse",
+    rolling: true, // Esto lo que hace es que reinicia el tiempo de expiracion de las sesiones con cada request
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoStore({
+      mongoUrl:
+        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/?retryWrites=true&w=majority",
+      mongoOptions,
+    }),
+    cookie: {
+      maxAge: 10000,
+    },
+  })
+);
+
+//le paso las rutas
+app.use("/", router);
+
+// definimos la configuracion HBS
 app.engine(
   "hbs",
   engine({
@@ -34,8 +63,8 @@ app.engine(
   })
 );
 
-//app set
-app.set("view engine", "hbs"); // se lo damos a express para q lo peuda setear
+//app set hbs
+app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
 app.set("views", join(__dirname, "/views"));
 
 const expressServer = app.listen("3000", () => {
@@ -104,24 +133,3 @@ io.on("connection", async (socket) => {
 app.on("error", (err) => {
   console.log(err);
 });
-
-// termino config de mongo logging
-//  Comienza config para loguear con mongo
-const mongoOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
-
-app.use(
-  session({
-    secret: "coderhouse",
-    rolling: true, // Esto lo que hace es que reinicia el tiempo de expiracion de las sesiones con cada request
-    resave: false,
-    saveUninitialized: false,
-    store: new MongoStore({
-      mongoUrl:
-        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/?retryWrites=true&w=majority",
-      mongoOptions,
-    }),
-  })
-);
