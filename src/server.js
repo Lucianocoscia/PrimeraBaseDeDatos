@@ -40,7 +40,7 @@ app.use(
     saveUninitialized: false,
     store: new MongoStore({
       mongoUrl:
-        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/?retryWrites=true&w=majority",
+        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority",
       mongoOptions,
     }),
     cookie: {
