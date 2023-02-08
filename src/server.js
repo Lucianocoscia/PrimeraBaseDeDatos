@@ -15,6 +15,12 @@ import Contenedor from "./api.js";
 //  COmienza config para loguear con mongo y session
 import MongoStore from "connect-mongo";
 import session from "express-session";
+import mongoose from "mongoose";
+//desafio passport
+import passport from "passport";
+import { passportStrategies } from "./lib/passport.lib.js";
+import { User } from "./models/user.model.js";
+import { authMiddlewares } from "./middleware/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -41,6 +47,7 @@ app.use(
     store: new MongoStore({
       mongoUrl:
         "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority",
+      //  "mongodb://localhost:27017/",
       mongoOptions,
     }),
     cookie: {
@@ -49,9 +56,29 @@ app.use(
   })
 );
 
+//passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use("login", passportStrategies.loginStrategy);
+passport.use("register", passportStrategies.registerStrategy);
+
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.findById(id)
+    .then((data) => {
+      done(null, data);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
 //le paso las rutas
 app.use("/", router);
-
+app.use(authMiddlewares.invalidUrl);
 // definimos la configuracion HBS
 app.engine(
   "hbs",
@@ -67,10 +94,9 @@ app.engine(
 app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
 app.set("views", join(__dirname, "/views"));
 
-const expressServer = app.listen("3000", () => {
-  console.log("server listening port 3000");
+const expressServer = app.listen(3000, () => {
+  console.log("listening on port 3000");
 });
-
 const io = new IOServer(expressServer);
 // product api es un contenedor para los productos
 const productApi = new Contenedor(

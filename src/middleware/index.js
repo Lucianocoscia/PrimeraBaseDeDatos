@@ -1,21 +1,24 @@
-const authMiddleware = (req, res, next) => {
-  const user = req.session.user;
+// const authMiddleware = (req, res, next) => {
+//   const user = req.session.user;
 
-  if (user) {
-    return next();
-  }
+//   if (user) {
+//     return next();
+//   }
 
-  res.redirect("/login");
+//   res.redirect("/login");
+// };
+
+// const checkNotLogged = (req, res, next) => {
+//   const user = req.session.user;
+
+//   if (!user) {
+//     return next();
+//   }
+
+//   res.redirect("/welcome");
+// };
+const invalidUrl = (req, res, next) => {
+  res.render("routing-error");
 };
-
-const checkNotLogged = (req, res, next) => {
-  const user = req.session.user;
-
-  if (!user) {
-    return next();
-  }
-
-  res.redirect("/welcome");
-};
-
-export const authMiddlewares = { checkNotLogged, authMiddleware };
+//checkNotLogged, authMiddleware,
+export const authMiddlewares = { invalidUrl };

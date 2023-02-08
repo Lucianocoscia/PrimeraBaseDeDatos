@@ -3,7 +3,25 @@
 
     <form action="/login" method="post"    class="d-flex flex-column justify-content-center"     >
         <input name="username" id="userName"  placeholder="Ingrese su nombre" class="form-control m-1 " type="text" required >
+        <input name="email" id="email"  placeholder="Ingrese su email" class="form-control m-1 " type="text" required >
+        <input name="contrasenia" id="contrasenia"  placeholder="Ingrese su contrasenia" class="form-control m-1 " type="password" required >
         <input class="btn btn-primary" type="submit" name="" id="" value="Login">
         <hr>
     </form>
 </div>
+        <div class="text-center"></div>
+        <button class="btn btn-success my-3" onclick="goSignup()">
+          SIGNUP
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function redireccionar(pagina) {
+        location.href = pagina;
+      }
+
+      function goSignup() {
+        redireccionar("/register");
+      }
+    </script>
