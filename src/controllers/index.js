@@ -72,7 +72,7 @@ const getLogin = (req, res) => {
     console.log("Get login");
 
     return res.render("bienvenida", {
-      usuario: user.username,
+      username: user.username,
       email: user.email,
     });
   }
@@ -81,10 +81,12 @@ const getLogin = (req, res) => {
 
 const getRegister = (req, res) => {
   if (req.isAuthenticated()) {
-    const user = req.session.user;
+    const user = req.user;
+    console.log("Get register");
+    // console.log(user);
 
     return res.render("bienvenida", {
-      usuario: user.username,
+      username: user.username,
       email: user.email,
     });
   }
@@ -100,8 +102,13 @@ const getRegisterFailiure = (req, res) => {
 };
 
 const logOut = (req, res) => {
-  req.logout();
-  res.render("logout");
+  console.log("Entre logou 1");
+  const username = req.user.username;
+  req.logout(() => {
+    console.log("Entre logou 2");
+
+    return res.render("logout", { username });
+  });
 };
 
 export const authController = {
