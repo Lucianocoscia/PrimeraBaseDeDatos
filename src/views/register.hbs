@@ -38,3 +38,19 @@
         </form>
       </div>
     </div>
+            <div class="text-center"></div>
+        <button class="btn btn-success my-3" onclick="goSignup()">
+          LOGIN
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function redireccionar(pagina) {
+        location.href = pagina;
+      }
+
+      function goSignup() {
+        redireccionar("/login");
+      }
+    </script>

@@ -3,6 +3,7 @@ import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+//conexion con sqlite3
 const config = {
   client: "sqlite3",
   connection: {

@@ -1,5 +1,6 @@
 import knex from "knex";
 
+// conexion con mysql
 const config = {
   client: "mysql",
   connection: {

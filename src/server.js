@@ -16,13 +16,15 @@ import Contenedor from "./api.js";
 import MongoStore from "connect-mongo";
 import session from "express-session";
 import mongoose from "mongoose";
+
 //desafio passport
 import passport from "passport";
 import { passportStrategies } from "./lib/passport.lib.js";
-import { User } from "./models/user.model.js";
-import { authMiddlewares } from "./middleware/index.js";
+import { User } from "./models/user.model.js"; // iporto el modelo de mongodb
+import { authMiddlewares } from "./middleware/index.js"; // importo middlewares
+import generateFaker from "./faker.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url)); //dirname
 
 const app = express(); //Inicializo la app
 
@@ -31,7 +33,6 @@ app.use(urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/views/layouts"));
 app.use(json());
 
-// termino config de mongo logging
 //  Comienza config para loguear con mongo
 const mongoOptions = {
   useNewUrlParser: true,
@@ -46,12 +47,12 @@ app.use(
     saveUninitialized: false,
     store: new MongoStore({
       mongoUrl:
-        "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority",
-      //  "mongodb://localhost:27017/",
+        // "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority", //conexion con mongo atlas
+        "mongodb://localhost:27017/passport", //conexion con mongodb, tengo q crear una carpeta y hacerle el mongod --dbpath ./elnombredelacarpetaqcree para inicializar mongo
       mongoOptions,
     }),
     cookie: {
-      maxAge: 10000,
+      maxAge: 60000, // tiempo de expiracion de la cookie
     },
   })
 );
@@ -78,7 +79,9 @@ passport.deserializeUser((id, done) => {
 
 //le paso las rutas
 app.use("/", router);
+//le paso el middelware de invalidurl
 app.use(authMiddlewares.invalidUrl);
+
 // definimos la configuracion HBS
 app.engine(
   "hbs",
@@ -94,10 +97,17 @@ app.engine(
 app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
 app.set("views", join(__dirname, "/views"));
 
+mongoose.set("strictQuery", true);
+mongoose.connect(
+  "mongodb://localhost:27017/passport",
+  console.log("database connected")
+);
+
 const expressServer = app.listen(3000, () => {
   console.log("listening on port 3000");
 });
 const io = new IOServer(expressServer);
+
 // product api es un contenedor para los productos
 const productApi = new Contenedor(
   {
@@ -132,6 +142,9 @@ io.on("connection", async (socket) => {
   // Cuando se conecta un nuevo cliente le emitimos a ese cliente todos los productos que se mandaron hasta el momento
   socket.emit("server:product", await productApi.getAll());
 
+  // de esta forma renderizo los productos defaker
+  // socket.emit("server:product", generateFaker());
+
   //Formateo la hora
   let date = new Date();
   let dateOficial = date.toLocaleString();
@@ -143,7 +156,8 @@ io.on("connection", async (socket) => {
     io.emit("server:message", await messageApi.getAll());
   });
 
-  // Nos ponesmo a escuchar el evento "client:product" que recibe la info de un producto
+  // Nos ponemos a escuchar el evento "client:product" que recibe la info de un producto
+
   socket.on("client:product", async (product) => {
     await productApi.save({
       title: product.title,
@@ -154,6 +168,12 @@ io.on("connection", async (socket) => {
     //Emitimos a TODOS los sockets conectados el arreglo de productos actualizados
     io.emit("server:product", await productApi.getAll());
   });
+
+  // de esta forma renderizo los productos defaker
+  // socket.on("client:product", () => {
+  //   let products = generateFaker();
+  //   io.emit("server:product", products);
+  // });
 });
 
 app.on("error", (err) => {

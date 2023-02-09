@@ -4,19 +4,21 @@ import generateFaker from "../faker.js";
 // import { authMiddlewares } from "../middleware/index.js";
 import { authController } from "../controllers/index.js";
 import passport from "passport";
+
 const router = Router();
 
 const api = new Contenedor("./src/productos.txt");
 
+// ruta con el form de productos y el chat
 router.get("/", async (req, res) => {
   res.render("form", { items: await api.getAll() });
 });
-
+//ruta de faker
 router.route("/api/productos-test").get(async (req, res) => {
   res.render("test", { items: generateFaker() });
 });
 
-// login
+// ruta de login, la parte comentada es sin passport
 router
   .route("/login")
   // .get(authMiddlewares.checkNotLogged, authController.serverLogin)
@@ -27,6 +29,7 @@ router
     authController.getLogin
   );
 
+// ruta de register
 router
   .route("/register")
   // .get(authMiddlewares.checkNotLogged, authController.serverRegister)
@@ -45,8 +48,9 @@ router
 //   .route("/welcome")
 //   .get(authMiddlewares.authMiddleware, authController.serverWelcome);
 
-
-router.get("logout", authController.logOut);
+// ruta de logout
+router.get("/logout", authController.logOut);
+//fails
 router.get("/fail-login", authController.getLoginFailiure);
 router.get("/fail-register", authController.getRegisterFailiure);
 

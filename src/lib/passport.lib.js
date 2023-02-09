@@ -15,12 +15,12 @@ const loginStrategy = new LocalStrategy(async (username, password, done) => {
     const user = await User.findOne({ username });
 
     if (!user || !validatePassword(password, user.password)) {
-      return done("Invalid credentials", null);
+      return done(null, false);
     }
 
     done(null, user);
   } catch (err) {
-    done("Error while login in", null);
+    done(null, false);
   }
 });
 
@@ -44,9 +44,10 @@ const registerStrategy = new LocalStrategy(
 
       req.user = createdUser;
 
-      return done(null, createdUser);
+      done(null, createdUser);
     } catch (err) {
-      done("Error while register", null);
+      console.log(err);
+      done(null, false);
     }
   }
 );
