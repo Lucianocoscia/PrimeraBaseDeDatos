@@ -22,12 +22,16 @@ import passport from "passport";
 import { passportStrategies } from "./lib/passport.lib.js";
 import { User } from "./models/user.model.js"; // iporto el modelo de mongodb
 import { authMiddlewares } from "./middleware/index.js"; // importo middlewares
-import generateFaker from "./faker.js";
+// import generateFaker from "./faker.js";
+//import dotenv
+import dotenv from "dotenv";
+// importo argumentos de entrada
+import args from "./yargs.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url)); //dirname
 
 const app = express(); //Inicializo la app
-
+dotenv.config();
 // middleware
 app.use(urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/views/layouts"));
@@ -48,7 +52,7 @@ app.use(
     store: new MongoStore({
       mongoUrl:
         // "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority", //conexion con mongo atlas
-        "mongodb://localhost:27017/passport", //conexion con mongodb, tengo q crear una carpeta y hacerle el mongod --dbpath ./elnombredelacarpetaqcree para inicializar mongo
+        process.env.URL_MONGOATLAS, //conexion con mongodb, tengo q crear una carpeta y hacerle el mongod --dbpath ./elnombredelacarpetaqcree para inicializar mongo
       mongoOptions,
     }),
     cookie: {
@@ -98,13 +102,10 @@ app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
 app.set("views", join(__dirname, "/views"));
 
 mongoose.set("strictQuery", true);
-mongoose.connect(
-  "mongodb://localhost:27017/passport",
-  console.log("database connected")
-);
+mongoose.connect(process.env.URL_MONGOOSEDB, console.log("database connected"));
 
-const expressServer = app.listen(3000, () => {
-  console.log("listening on port 3000");
+const expressServer = app.listen(args.puerto, () => {
+  console.log(`Server listening on port ${args.puerto}`);
 });
 const io = new IOServer(expressServer);
 

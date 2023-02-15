@@ -65,6 +65,9 @@
 //   getLoginFailiure,
 //   getRegisterFailiure,
 // };
+import util from "util";
+import { fork } from "child_process";
+import args from "../yargs.js";
 
 const getLogin = (req, res) => {
   if (req.isAuthenticated()) {
@@ -111,10 +114,37 @@ const logOut = (req, res) => {
   });
 };
 
+// usando objeto process y fork
+const getInfo = (req, res) => {
+  res.render("info", {
+    entryArgs: JSON.stringify(args),
+    platform: process.platform,
+    versionNode: process.version,
+    memory: process.memoryUsage().rss,
+    path: process.execPath,
+    processID: process.pid,
+    dir: process.cwd(),
+  });
+};
+
+const getRandom = (req, res) => {
+  const { cant } = req.query;
+  const childProcess = fork("./src/child.js");
+  const quantity = cant ? cant : 100000000;
+
+  childProcess.send(quantity);
+
+  childProcess.on("message", (response) => {
+    res.json(response);
+  });
+};
+
 export const authController = {
   getLogin,
   getRegister,
   getLoginFailiure,
   getRegisterFailiure,
   logOut,
+  getInfo,
+  getRandom,
 };

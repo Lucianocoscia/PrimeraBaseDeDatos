@@ -18,6 +18,11 @@ router.route("/api/productos-test").get(async (req, res) => {
   res.render("test", { items: generateFaker() });
 });
 
+//ruta info
+router.route("/info").get(authController.getInfo);
+//ruta api-randoms
+router.route("/api-randoms").get(authController.getRandom);
+
 // ruta de login, la parte comentada es sin passport
 router
   .route("/login")
