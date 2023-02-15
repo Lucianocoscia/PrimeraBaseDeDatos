@@ -1,7 +1,7 @@
 import knex from "knex";
 
 // conexion con mysql
-const config = {
+const configMYSQL = {
   client: "mysql",
   connection: {
     host: "127.0.0.1",
@@ -33,3 +33,4 @@ const createTable = async () => {
 };
 
 createTable();
+export default configMYSQL;

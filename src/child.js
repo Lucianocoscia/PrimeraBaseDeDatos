@@ -1,3 +1,4 @@
+// CHILD DE FORK
 const randomIntFromInterval = () => {
   return Math.floor(Math.random() * 1001);
 };

@@ -13,6 +13,7 @@ const api = new Contenedor("./src/productos.txt");
 router.get("/", async (req, res) => {
   res.render("form", { items: await api.getAll() });
 });
+
 //ruta de faker
 router.route("/api/productos-test").get(async (req, res) => {
   res.render("test", { items: generateFaker() });
@@ -20,6 +21,7 @@ router.route("/api/productos-test").get(async (req, res) => {
 
 //ruta info
 router.route("/info").get(authController.getInfo);
+
 //ruta api-randoms
 router.route("/api-randoms").get(authController.getRandom);
 
@@ -55,6 +57,7 @@ router
 
 // ruta de logout
 router.get("/logout", authController.logOut);
+
 //fails
 router.get("/fail-login", authController.getLoginFailiure);
 router.get("/fail-register", authController.getRegisterFailiure);

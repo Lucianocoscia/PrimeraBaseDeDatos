@@ -1,5 +1,6 @@
 import knex from "knex";
 
+//CRUD
 class Contenedor {
   constructor(databaseConfig, tableName) {
     this.database = knex(databaseConfig);

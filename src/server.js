@@ -2,15 +2,14 @@ import express, { json, urlencoded } from "express"; //importo express
 //dirname
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
-// importo hbs
-import { engine } from "express-handlebars";
-//importo rutas
-import router from "./routes/index.js";
+import { engine } from "express-handlebars"; // importo hbs
+import router from "./routes/index.js"; //importo rutas
+import { Server as IOServer } from "socket.io"; //importo socket
+import Contenedor from "./api.js"; //importo contendor con clase q maneja todo el crud
 
-//importo socket
-import { Server as IOServer } from "socket.io";
-//importo contendor con clase q maneja todo el crud
-import Contenedor from "./api.js";
+//importo configs de connections
+import configSqlite3 from "./migrations/message.table.js";
+import configMYSQL from "./migrations/product.table.js";
 
 //  COmienza config para loguear con mongo y session
 import MongoStore from "connect-mongo";
@@ -20,18 +19,19 @@ import mongoose from "mongoose";
 //desafio passport
 import passport from "passport";
 import { passportStrategies } from "./lib/passport.lib.js";
-import { User } from "./models/user.model.js"; // iporto el modelo de mongodb
+import { User } from "./models/user.model.js"; // importo el modelo de mongodb
 import { authMiddlewares } from "./middleware/index.js"; // importo middlewares
 // import generateFaker from "./faker.js";
-//import dotenv
-import dotenv from "dotenv";
-// importo argumentos de entrada
-import args from "./yargs.js";
+
+import dotenv from "dotenv"; //import dotenv
+import args from "./yargs.js"; // importo argumentos de entrada
 
 const __dirname = dirname(fileURLToPath(import.meta.url)); //dirname
 
 const app = express(); //Inicializo la app
-dotenv.config();
+
+dotenv.config(); //Inicializo el dotenv
+
 // middleware
 app.use(urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/views/layouts"));
@@ -51,8 +51,8 @@ app.use(
     saveUninitialized: false,
     store: new MongoStore({
       mongoUrl:
-        // "mongodb+srv://admin:admin123@segundaentregabackend.ily8srs.mongodb.net/user?retryWrites=true&w=majority", //conexion con mongo atlas
-        process.env.URL_MONGOATLAS, //conexion con mongodb, tengo q crear una carpeta y hacerle el mongod --dbpath ./elnombredelacarpetaqcree para inicializar mongo
+        // process.env.URL_MONGOATLAS, //conexion con mongo atlas
+        process.env.URL_MONGODB, //conexion con mongodb, tengo q crear una carpeta y hacerle el mongod --dbpath ./elnombredelacarpetaqcree para inicializar mongo
       mongoOptions,
     }),
     cookie: {
@@ -81,10 +81,9 @@ passport.deserializeUser((id, done) => {
     });
 });
 
-//le paso las rutas
-app.use("/", router);
-//le paso el middelware de invalidurl
-app.use(authMiddlewares.invalidUrl);
+app.use("/", router); //le paso las rutas
+
+app.use(authMiddlewares.invalidUrl); //le paso el middelware de invalidurl
 
 // definimos la configuracion HBS
 app.engine(
@@ -101,50 +100,28 @@ app.engine(
 app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
 app.set("views", join(__dirname, "/views"));
 
-mongoose.set("strictQuery", true);
-mongoose.connect(process.env.URL_MONGOOSEDB, console.log("database connected"));
+mongoose.set("strictQuery", true); //mongoose set para sacar warning
+mongoose.connect(process.env.URL_MONGOOSEDB, console.log("database connected")); //mongoose conecction
 
 const expressServer = app.listen(args.puerto, () => {
   console.log(`Server listening on port ${args.puerto}`);
 });
 const io = new IOServer(expressServer);
 
-// product api es un contenedor para los productos
-const productApi = new Contenedor(
-  {
-    client: "mysql",
-    connection: {
-      host: "127.0.0.1",
-      user: "root",
-      password: "",
-      database: "ecommerce",
-    },
-    pool: { min: 0, max: 7 },
-  },
-  "product"
-);
-// messageapi es un contenedor para los mensajes
-const messageApi = new Contenedor(
-  {
-    client: "sqlite3",
-    connection: {
-      filename: path.resolve(__dirname, "./database/ecommerce.sqlite"),
-    },
-    useNullAsDefault: true,
-  },
-  "message"
-);
+const productApi = new Contenedor(configMYSQL, "product"); // product api es un contenedor para los productos
+
+const messageApi = new Contenedor(configSqlite3, "message"); // messageapi es un contenedor para los mensajes
 
 io.on("connection", async (socket) => {
   console.log(`New connection, socket ID: ${socket.id}`);
 
   // Cuando se conecta un nuevo cliente le emitimos a ese cliente todos los productos que se mandaron hasta el momento
   socket.emit("server:message", await messageApi.getAll());
+
   // Cuando se conecta un nuevo cliente le emitimos a ese cliente todos los productos que se mandaron hasta el momento
   socket.emit("server:product", await productApi.getAll());
 
-  // de esta forma renderizo los productos defaker
-  // socket.emit("server:product", generateFaker());
+  // socket.emit("server:product", generateFaker());  // de esta forma renderizo los productos defaker
 
   //Formateo la hora
   let date = new Date();

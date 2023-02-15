@@ -1,24 +1,28 @@
-// const authMiddleware = (req, res, next) => {
-//   const user = req.session.user;
+// middelwares de chequeo de sesion sin passport
 
-//   if (user) {
-//     return next();
-//   }
+/* const authMiddleware = (req, res, next) => {
+  const user = req.session.user;
 
-//   res.redirect("/login");
-// };
+  if (user) {
+    return next();
+  }
 
-// const checkNotLogged = (req, res, next) => {
-//   const user = req.session.user;
+  res.redirect("/login");
+};
 
-//   if (!user) {
-//     return next();
-//   }
+const checkNotLogged = (req, res, next) => {
+  const user = req.session.user;
 
-//   res.redirect("/welcome");
-// };
+  if (!user) {
+    return next();
+  }
+
+  res.redirect("/welcome");
+}; */
+
+//middleware a partir de utilizacion de paassport
 const invalidUrl = (req, res, next) => {
   res.render("routing-error");
 };
-//checkNotLogged, authMiddleware,
+//checkNotLogged, authMiddleware, esto es lo q se exporta
 export const authMiddlewares = { invalidUrl };
