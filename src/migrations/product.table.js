@@ -12,7 +12,7 @@ const configMYSQL = {
   pool: { min: 0, max: 7 },
 };
 
-const database = knex(config);
+const database = knex(configMYSQL);
 
 const createTable = async () => {
   try {
@@ -32,5 +32,5 @@ const createTable = async () => {
   }
 };
 
-createTable();
+// createTable();
 export default configMYSQL;

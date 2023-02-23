@@ -13,7 +13,7 @@ const configSqlite3 = {
   useNullAsDefault: true,
 };
 
-const database = knex(config);
+const database = knex(configSqlite3);
 
 const createMessageTable = async () => {
   try {
@@ -31,6 +31,6 @@ const createMessageTable = async () => {
   }
 };
 
-createMessageTable();
+// createMessageTable();
 
 export default configSqlite3;

@@ -95,7 +95,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
       });
   });
 
-  app.use("/", router); //le paso las rutas
+  app.use("/api/randoms", router); //le paso las rutas
 
   app.use(authMiddlewares.invalidUrl); //le paso el middelware de invalidurl
 

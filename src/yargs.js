@@ -3,9 +3,11 @@ import yargs from "yargs";
 const args = yargs(process.argv.slice(2))
   .alias({
     p: "puerto",
+    m: "mode",
   })
   .default({
-    puerto: 8080,
+    puerto: 3000,
+    mode: "FORK",
   }).argv;
 
 export default args;
