@@ -4,6 +4,7 @@ import generateFaker from "../faker.js";
 // import { authMiddlewares } from "../middleware/index.js";
 import { authController } from "../controllers/index.js";
 import passport from "passport";
+import compression from "compression";
 
 const router = Router();
 
@@ -20,7 +21,8 @@ router.route("/api/productos-test").get(async (req, res) => {
 });
 
 //ruta info
-router.route("/info").get(authController.getInfo);
+router.route("/info-gzip").get(compression(), authController.getInfo);
+router.route("/info-nogzip").get(authController.getInfo);
 
 //ruta api-randoms
 router.route("/api-randoms").get(authController.getRandom);

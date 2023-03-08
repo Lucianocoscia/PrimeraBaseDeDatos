@@ -30,6 +30,9 @@ import args from "./yargs.js"; // importo argumentos de entrada
 import os from "os";
 import cluster from "cluster";
 
+//pino
+import logger from "./lib/logger.js";
+
 const cpus = os.cpus();
 
 const __dirname = dirname(fileURLToPath(import.meta.url)); //dirname
@@ -43,6 +46,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
     cluster.fork();
   });
   cluster.on("exit", (worker) => {
+    logger.info(`Worker ${worker.process.pid} died`);
     console.log(`Worker ${worker.process.pid} died`);
     cluster.fork();
   });
@@ -117,6 +121,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   mongoose.set("strictQuery", true); //mongoose set para sacar warning
   mongoose.connect(
     process.env.URL_MONGOOSEDB,
+    logger.info("database connected"),
     console.log("database connected")
   ); //mongoose conecction
 
@@ -130,6 +135,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   const messageApi = new Contenedor(configSqlite3, "message"); // messageapi es un contenedor para los mensajes
 
   io.on("connection", async (socket) => {
+    logger.info(`New connection, socket ID: ${socket.id}`);
     console.log(`New connection, socket ID: ${socket.id}`);
 
     // Cuando se conecta un nuevo cliente le emitimos a ese cliente todos los productos que se mandaron hasta el momento
@@ -172,6 +178,8 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   });
 
   app.on("error", (err) => {
+    logger.error(`New connection, socket ID: ${socket.id}`);
+
     console.log(err);
   });
 }
