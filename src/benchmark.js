@@ -20,4 +20,4 @@ function run(url) {
   });
 }
 
-run("http://localhost:8080/info");
+run("http://localhost:8080/info-nogzip");
