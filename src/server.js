@@ -5,11 +5,11 @@ import { fileURLToPath } from "url";
 import { engine } from "express-handlebars"; // importo hbs
 import router from "./routes/index.js"; //importo rutas
 import { Server as IOServer } from "socket.io"; //importo socket
-import Contenedor from "./api.js"; //importo contendor con clase q maneja todo el crud
+import Contenedor from "./crud/api.js"; //importo contendor con clase q maneja todo el crud
 
 //importo configs de connections
-import configSqlite3 from "./migrations/message.table.js";
-import configMYSQL from "./migrations/product.table.js";
+import configSqlite3 from "./db/sqlite.js";
+import configMYSQL from "./db/mysql.js";
 
 //  COmienza config para loguear con mongo y session
 import MongoStore from "connect-mongo";
@@ -19,8 +19,8 @@ import mongoose from "mongoose";
 //desafio passport
 import passport from "passport";
 import { passportStrategies } from "./lib/passport.lib.js";
-import { User } from "./models/user.model.js"; // importo el modelo de mongodb
-import { authMiddlewares } from "./middleware/index.js"; // importo middlewares
+import { User } from "./table/models/user.model.js"; // importo el modelo de mongodb
+import { authMiddlewares } from "./middleware/invalidURL.middleware.js"; // importo middlewares
 // import generateFaker from "./faker.js";
 
 import dotenv from "dotenv"; //import dotenv
@@ -31,7 +31,7 @@ import os from "os";
 import cluster from "cluster";
 
 //pino
-import logger from "./lib/logger.js";
+// import logger from "./lib/logger.js";
 
 const cpus = os.cpus();
 
@@ -46,15 +46,32 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
     cluster.fork();
   });
   cluster.on("exit", (worker) => {
-    logger.info(`Worker ${worker.process.pid} died`);
+    // logger.info(`Worker ${worker.process.pid} died`);
     console.log(`Worker ${worker.process.pid} died`);
     cluster.fork();
   });
 } else {
   // middleware
-  app.use(urlencoded({ extended: true }));
-  app.use(express.static(__dirname + "/views/layouts"));
   app.use(json());
+
+  app.use(urlencoded({ extended: true }));
+
+  // definimos la configuracion HBS
+  app.engine(
+    "hbs",
+    engine({
+      extname: ".hbs",
+      defaultLayout: "main.html",
+      layoutsDir: join(__dirname, "/views/layouts"),
+      partialsDir: join(__dirname, "/views/partials"),
+    })
+  );
+
+  //app set hbs
+  app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
+  app.set("views", join(__dirname, "/views"));
+
+  app.use(express.static(__dirname + "/views/layouts"));
 
   //  Comienza config para loguear con mongo
   const mongoOptions = {
@@ -82,6 +99,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   //passport
   app.use(passport.initialize());
   app.use(passport.session());
+
   passport.use("login", passportStrategies.loginStrategy);
   passport.use("register", passportStrategies.registerStrategy);
 
@@ -99,35 +117,24 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
       });
   });
 
+  // //Envío las rutas al logger.info
+  // app.use ((req, res, next) => {
+  //   logger.info.info(req.url)
+  //   next()
+  // })
+
   app.use("/", router); //le paso las rutas
 
   app.use(authMiddlewares.invalidUrl); //le paso el middelware de invalidurl
 
-  // definimos la configuracion HBS
-  app.engine(
-    "hbs",
-    engine({
-      extname: ".hbs",
-      defaultLayout: "main.html",
-      layoutsDir: join(__dirname, "/views/layouts"),
-      partialsDir: join(__dirname, "/views/partials"),
-    })
-  );
-
-  //app set hbs
-  app.set("view engine", "hbs"); // se lo damos a express para q lo pueda setear
-  app.set("views", join(__dirname, "/views"));
-
   mongoose.set("strictQuery", true); //mongoose set para sacar warning
-  mongoose.connect(
-    process.env.URL_MONGOOSEDB,
-    logger.info("database connected"),
-    console.log("database connected")
-  ); //mongoose conecction
+  mongoose.connect(process.env.URL_MONGOOSEDB); //mongoose conecction
+  console.log("database connected");
 
   const expressServer = app.listen(args.puerto, () => {
     console.log(`Server listening on port ${args.puerto}`);
   });
+
   const io = new IOServer(expressServer);
 
   const productApi = new Contenedor(configMYSQL, "product"); // product api es un contenedor para los productos
@@ -135,7 +142,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   const messageApi = new Contenedor(configSqlite3, "message"); // messageapi es un contenedor para los mensajes
 
   io.on("connection", async (socket) => {
-    logger.info(`New connection, socket ID: ${socket.id}`);
+    // logger.info(`New connection, socket ID: ${socket.id}`);
     console.log(`New connection, socket ID: ${socket.id}`);
 
     // Cuando se conecta un nuevo cliente le emitimos a ese cliente todos los productos que se mandaron hasta el momento
@@ -178,8 +185,6 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   });
 
   app.on("error", (err) => {
-    logger.error(`New connection, socket ID: ${socket.id}`);
-
     console.log(err);
   });
 }

@@ -1,16 +1,5 @@
 import knex from "knex";
-
-// conexion con mysql
-const configMYSQL = {
-  client: "mysql",
-  connection: {
-    host: "127.0.0.1",
-    user: "root",
-    password: "",
-    database: "ecommerce",
-  },
-  pool: { min: 0, max: 7 },
-};
+import configMYSQL from "../db/mysql";
 
 const database = knex(configMYSQL);
 
@@ -32,5 +21,4 @@ const createTable = async () => {
   }
 };
 
-// createTable();
-export default configMYSQL;
+createTable();

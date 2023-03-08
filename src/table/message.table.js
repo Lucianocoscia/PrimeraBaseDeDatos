@@ -1,22 +1,11 @@
 import knex from "knex";
-import path, { dirname, join } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-//conexion con sqlite3
-const configSqlite3 = {
-  client: "sqlite3",
-  connection: {
-    filename: path.resolve(__dirname, "../database/ecommerce.sqlite"),
-  },
-  useNullAsDefault: true,
-};
+import configSqlite3 from "../db/sqlite";
 
 const database = knex(configSqlite3);
 
 const createMessageTable = async () => {
   try {
+    await database.schema.dropTableIfExists("message");
     await database.schema.createTable("message", (messageTable) => {
       messageTable.increments("id").primary();
       messageTable.string("username", 100).notNullable();
@@ -28,9 +17,8 @@ const createMessageTable = async () => {
     database.destroy();
   } catch (err) {
     console.log(err);
+    database.destroy();
   }
 };
 
-// createMessageTable();
-
-export default configSqlite3;
+createMessageTable();

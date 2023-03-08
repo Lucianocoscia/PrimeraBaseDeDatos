@@ -1,10 +1,11 @@
 import { Router } from "express";
-import Contenedor from "../api.js";
+import Contenedor from "../crud/api.js";
 import generateFaker from "../faker.js";
 // import { authMiddlewares } from "../middleware/index.js";
 import { authController } from "../controllers/index.js";
 import passport from "passport";
 import compression from "compression";
+import logger from "../lib/logger.js";
 
 const router = Router();
 
@@ -17,7 +18,11 @@ router.get("/", async (req, res) => {
 
 //ruta de faker
 router.route("/api/productos-test").get(async (req, res) => {
-  res.render("test", { items: generateFaker() });
+  try {
+    res.render("test", { items: generateFaker() });
+  } catch (err) {
+    logger.error(err);
+  }
 });
 
 //ruta info

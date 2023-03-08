@@ -3,28 +3,33 @@ import pino from "pino";
 
 dotenv.config();
 
-const buildProdLogger = () => {
-  const prodLogger = pino("debug.log");
+const buildWarnLogger = () => {
+  const warnLogger = pino("warn.log");
 
-  prodLogger.level = "debug";
+  warnLogger.level = "warn";
 
-  return prodLogger;
+  return warnLogger;
 };
 
-const buildDevLogger = () => {
-  const devLogger = pino();
+const buildInfoLogger = () => {
+  const infoLogger = pino();
 
-  devLogger.level = "info";
+  infoLogger.level = "info";
 
-  return devLogger;
+  return infoLogger;
+};
+const buildErrorLogger = () => {
+  const errorLogger = pino("error.log");
+
+  errorLogger.level = "error";
+
+  return errorLogger;
 };
 
-let logger;
+let info = buildInfoLogger();
+let warning = buildWarnLogger();
+let error = buildErrorLogger();
 
-if (process.env.NODE_ENV.toLocaleUpperCase() === "PROD") {
-  logger = buildProdLogger();
-} else {
-  logger = buildDevLogger();
-}
+const logger = { info, warning, error };
 
 export default logger;

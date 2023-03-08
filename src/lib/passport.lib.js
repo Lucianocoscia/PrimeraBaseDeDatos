@@ -1,7 +1,7 @@
 // PASSPORT STRATEGYS
 import bcrypt from "bcrypt";
 import LocalStrategy from "passport-local";
-import { User } from "../models/user.model.js";
+import { User } from "../table/models/user.model.js";
 
 const hashPasword = (password) => {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
