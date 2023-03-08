@@ -21,3 +21,6 @@ function run(url) {
 }
 
 run("http://localhost:8080/info-nogzip");
+//en el package.json
+// "test": "node ./src/benchmark.js ",
+// "start":"0x ./src/server.js"

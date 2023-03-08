@@ -31,7 +31,7 @@ import os from "os";
 import cluster from "cluster";
 
 //pino
-// import logger from "./lib/logger.js";
+import logger from "./lib/logger.js";
 
 const cpus = os.cpus();
 
@@ -118,10 +118,10 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   });
 
   // //Envío las rutas al logger.info
-  // app.use ((req, res, next) => {
-  //   logger.info.info(req.url)
-  //   next()
-  // })
+  app.use((req, res, next) => {
+    logger.info(` Peticion a ${req.url}, con metodo ${req.method}}`);
+    next();
+  });
 
   app.use("/", router); //le paso las rutas
 
@@ -129,6 +129,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
 
   mongoose.set("strictQuery", true); //mongoose set para sacar warning
   mongoose.connect(process.env.URL_MONGOOSEDB); //mongoose conecction
+  logger.info(`Server listening on port ${args.puerto}`);
   console.log("database connected");
 
   const expressServer = app.listen(args.puerto, () => {

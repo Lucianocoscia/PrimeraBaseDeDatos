@@ -1,35 +1,34 @@
-import dotenv from "dotenv";
 import pino from "pino";
+import pinoMS from "pino-multi-stream";
 
-dotenv.config();
+// Crear un stream para los logs de consola
+const consoleStream = pino.destination({ sync: false });
 
-const buildWarnLogger = () => {
-  const warnLogger = pino("warn.log");
+// Crear un stream para los logs de warning en el archivo warn.log
+const warnStream = pino.destination({
+  dest: "./warn.log",
+  sync: true,
+});
 
-  warnLogger.level = "warn";
+// Crear un stream para los logs de error en el archivo error.log
+const errorStream = pino.destination({
+  dest: "./error.log",
+  sync: true,
+});
 
-  return warnLogger;
-};
+// Crear una función que determine en qué stream escribir el log en función del nivel
+const streams = pinoMS.multistream([
+  { level: "info", stream: consoleStream },
+  { level: "warn", stream: warnStream },
+  { level: "error", stream: errorStream },
+]);
 
-const buildInfoLogger = () => {
-  const infoLogger = pino();
-
-  infoLogger.level = "info";
-
-  return infoLogger;
-};
-const buildErrorLogger = () => {
-  const errorLogger = pino("error.log");
-
-  errorLogger.level = "error";
-
-  return errorLogger;
-};
-
-let info = buildInfoLogger();
-let warning = buildWarnLogger();
-let error = buildErrorLogger();
-
-const logger = { info, warning, error };
+// Crear configuración de logger
+const logger = pino(
+  {
+    level: "info",
+  },
+  pino.multistream(streams)
+);
 
 export default logger;
