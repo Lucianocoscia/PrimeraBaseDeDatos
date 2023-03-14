@@ -132,7 +132,7 @@ if (cluster.isPrimary && args.mode.toUpperCase() === "CLUSTER") {
   logger.info(`Server listening on port ${args.puerto}`);
   console.log("database connected");
 
-  const expressServer = app.listen(args.puerto, () => {
+  const expressServer = app.listen(args.puerto || process.env.PORT, () => {
     console.log(`Server listening on port ${args.puerto}`);
   });
 
